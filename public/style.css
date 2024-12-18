@@ -1,0 +1,162 @@
+/* General Body Styling */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f9; /* Light background for a modern aesthetic */
+  color: #333333; /* Dark font color for better contrast */
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Align the content to the center */
+}
+
+/* Header */
+h1 {
+  font-size: 3em;
+  text-align: center;
+  color: #333333; /* Dark header text for readability */
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  font-weight: bold;
+  width: 100%;
+}
+
+/* Page Options */
+#pageOptions {
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  width: 100%;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+/* Results per page Dropdown */
+select {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  color: #333333; /* Dark font color in the dropdown */
+  outline: none;
+  margin-right: 20px; /* Space between dropdown and total records text */
+  transition: background-color 0.3s ease;
+}
+
+select:hover {
+  background-color: #f0f0f0;
+}
+
+/* Total Records Display */
+#totalRecords {
+  font-size: 1.2em;
+  color: #333333; /* Dark font color for total records */
+}
+
+/* Table Styling */
+table {
+  margin: 0 auto; /* Center the table horizontally */
+  width: 90%; /* Adjust width as necessary for responsive design */
+  border-collapse: collapse;
+  background-color: #ffffff; /* Light table background */
+  border-radius: 10px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px; /* Space between table and pagination */
+}
+
+/* Table Headers */
+th, td {
+  padding: 20px 25px;
+  text-align: left;
+  font-size: 1.1em;
+  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  color: #333333; /* Dark font color in table cells */
+}
+
+/* Hover Effects on Table Rows */
+tr:hover {
+  background-color: #f5f5f5; /* Lighten the row on hover */
+}
+
+/* Table Header */
+th {
+  background-color: #f0f0f0;
+  color: #4CAF50; /* Green header text */
+  font-size: 1.3em;
+}
+
+/* Table Links */
+td a {
+  text-decoration: none;
+  color: #4CAF50; /* Green color for links */
+  transition: color 0.3s ease;
+}
+
+td a:hover {
+  color: #333333; /* Dark color on hover */
+}
+
+/* Pagination Controls */
+#paginationControls {
+  display: flex;
+  justify-content: center; /* Center pagination controls */
+  align-items: center;
+  margin-top: 30px;
+  font-size: 1.1em;
+  width: 100%;
+}
+
+/* Page Number Buttons */
+#paginationControls button,
+#paginationControls .pageNumbers span {
+  padding: 10px 20px;
+  border: 1px solid #4CAF50;
+  background-color: #ffffff;
+  color: #333333; /* Dark font color for buttons */
+  border-radius: 5px;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#paginationControls button:hover,
+#paginationControls .pageNumbers span:hover {
+  background-color: #4CAF50;
+  color: #fff;
+  border-color: #4CAF50;
+}
+
+/* Active Page Number */
+#paginationControls .pageNumbers span.active {
+  background-color: #4CAF50;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Disabled Pagination Buttons */
+#paginationControls button:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  border-color: #ccc;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  table, th, td {
+    font-size: 1em;
+  }
+
+  #paginationControls button,
+  #paginationControls .pageNumbers span {
+    padding: 8px 15px;
+    font-size: 1em;
+  }
+
+  select {
+    font-size: 1em;
+    padding: 8px 15px;
+  }
+}

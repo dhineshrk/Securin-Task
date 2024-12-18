@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVE List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>CVE Data</h1>
+    
+    <div>
+        <!-- Dropdown for selecting results per page -->
+        <label for="resultsPerPage">Results per page:</label>
+        <select id="resultsPerPage">
+            <option value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+
+    <div id="totalRecords">Total Records: 0</div>
+
+    <!-- Table to display CVE data -->
+    <table id="cveTable">
+        <thead>
+            <tr>
+                <th>CVE ID</th>
+                <th>IDENTIFIER</th>
+                <th>Published Date</th>
+                <th>Last Modified Date</th>
+                <th>STATUS</th>
+            </tr>
+        </thead>
+        <tbody></tbody> <!-- This is where the rows will be added dynamically -->
+    </table>
+
+    <!-- Pagination controls -->
+    <div id="paginationControls">
+        <button id="prevPage" onclick="loadCVEs(currentPage - 1)">Previous</button>
+        <span id="pageNumber">Page 1</span>
+        <button id="nextPage" onclick="loadCVEs(currentPage + 1)">Next</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
