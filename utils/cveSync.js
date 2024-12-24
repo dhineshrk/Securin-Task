@@ -1,19 +1,10 @@
 const axios = require('axios');
 const mongoose = require('mongoose');
-const CVE = require('../models/cveModel');// CVE Model
+const CVE = require('../models/cveModel');
+const connectDB = require('./db'); // Import the db connection function
 
 // NVD API base URL
 const API_BASE_URL = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
-
-// MongoDB connection setup
-const connectToDatabase = async () => {
-  try {
-    await mongoose.connect('mongodb://localhost:27017/cveDB', { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log('Connected to the database');
-  } catch (error) {
-    console.error('Database connection error:', error);
-  }
-};
 
 // Function to fetch CVE data from the NVD API with pagination
 const fetchCVEData = async (startIndex = 0, resultsPerPage = 10) => {
@@ -87,7 +78,7 @@ const syncDataPeriodically = () => {
 
 // Start sync process
 const startSync = async () => {
-  await connectToDatabase();
+  await connectDB(); // Use the function to connect to the database
   await syncDataPeriodically();
 };
 
