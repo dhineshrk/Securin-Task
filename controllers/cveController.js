@@ -36,14 +36,17 @@ async function fetchCves(resultsPerPage, page, searchCveId, startDate, cvssScore
 
         // Filter CVEs by startDate (only published on the startDate)
         const filteredCves = data.vulnerabilities?.filter(v => {
-            const publishedDate = new Date(v.cve.published).toISOString().split('T')[0]; // Parse and format published date
-            console.log(publishedDate)
-            console.log("first")
+            const publishedDate = new Date(v.cve.published);
+            // Set time to midnight (00:00:00) to ensure the comparison is only based on the date
+            publishedDate.setHours(0, 0, 0, 0);
+
             // If the startDate filter is set, include only CVEs published on this date
             if (startDate) {
-                const formattedStartDate = new Date(startDate).toISOString().split('T')[0];
-                console.log(formattedStartDate)
-                if (publishedDate !== formattedStartDate) {
+                const formattedStartDate = new Date(startDate);
+                formattedStartDate.setHours(0, 0, 0, 0); // Set time to midnight
+
+                // Compare only the date part, not the time
+                if (publishedDate.getTime() !== formattedStartDate.getTime()) {
                     return false; // Filter out CVEs not published on the startDate
                 }
             }
@@ -60,10 +63,74 @@ async function fetchCves(resultsPerPage, page, searchCveId, startDate, cvssScore
             sourceIdentifier: v.cve.sourceIdentifier || 'N/A',
             cvssScore: v.cve.metrics.cvssMetricV2 && v.cve.metrics.cvssMetricV2[0].cvssData.baseScore || 'N/A',
         }));
-        // console.log(cveList);
+
         return cveList;
     } catch (error) {
         console.error('Error in fetchCves function:', error.message);
+        throw error;
+    }
+}
+
+// Fetch CVEs by a specific start date
+async function fetchCvesByDate(startDate, resultsPerPage = 20, page = 1) {
+    const cacheKey = `cves_by_date_${startDate}_${resultsPerPage}_${page}`;
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    }
+
+    // Ensure resultsPerPage is within a reasonable limit (for example, 20-100)
+    resultsPerPage = Math.min(Math.max(resultsPerPage, 1), 100);  // Limit results per page to between 1 and 100
+
+    const startIndex = (page - 1) * resultsPerPage; // Correctly calculate the start index for pagination
+    let url = `https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=${resultsPerPage}&startIndex=${startIndex}`;
+
+    try {
+        const response = await fetch(url);
+
+        // Check if the response is not a JSON (i.e., HTML error page)
+        if (response.headers.get('content-type').includes('text/html')) {
+            const htmlError = await response.text();
+            console.error('Received HTML error:', htmlError);
+            throw new Error('Received HTML error response, not JSON');
+        }
+
+        // Parse response as JSON
+        const data = await response.json();
+
+        // Check if 'vulnerabilities' exists in the response
+        if (!data.vulnerabilities) {
+            return []; // Return an empty array if no vulnerabilities are found
+        }
+
+        // Filter CVEs by startDate (only published on the startDate)
+        const filteredCves = data.vulnerabilities?.filter(v => {
+            const publishedDate = new Date(v.cve.published);
+            publishedDate.setHours(0, 0, 0, 0); // Set time to midnight
+
+            // Format the provided startDate to match the yyyy-mm-dd format
+            const formattedStartDate = new Date(startDate);
+            formattedStartDate.setHours(0, 0, 0, 0); // Set time to midnight
+
+            // Compare only the date part, not the time
+            return publishedDate.getTime() === formattedStartDate.getTime();
+        }) || [];
+
+        // Map the filtered data to the desired format
+        const cveList = filteredCves.map(v => ({
+            cveId: v.cve.id || 'N/A',
+            publishedDate: v.cve.published || 'N/A',
+            lastModified: v.cve.lastModified || 'N/A',
+            vulnStatus: v.cve.vulnStatus || 'N/A',
+            sourceIdentifier: v.cve.sourceIdentifier || 'N/A',
+            cvssScore: v.cve.metrics.cvssMetricV2 && v.cve.metrics.cvssMetricV2[0].cvssData.baseScore || 'N/A',
+        }));
+
+        // Cache the result for future use
+        cache.set(cacheKey, cveList);
+        return cveList;
+    } catch (error) {
+        console.error('Error in fetchCvesByDate function:', error.message);
         throw error;
     }
 }
@@ -107,66 +174,6 @@ async function fetchCveById(cveId) {
         return cveDetails;
     } catch (error) {
         console.error('Error in fetchCveById function:', error.message);
-        throw error;
-    }
-}
-
-// Fetch CVEs by a specific start date
-async function fetchCvesByDate(startDate, resultsPerPage = 20, page = 1) {
-    const cacheKey = `cves_by_date_${startDate}_${resultsPerPage}_${page}`;
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        return cachedData;
-    }
-
-    // Ensure resultsPerPage is within a reasonable limit (for example, 20-100)
-    resultsPerPage = Math.min(Math.max(resultsPerPage, 1), 100);  // Limit results per page to between 1 and 100
-
-    const startIndex = (page - 1) * resultsPerPage; // Correctly calculate the start index for pagination
-    let url = `https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=${resultsPerPage}&startIndex=${startIndex}`;
-
-    try {
-        const response = await fetch(url);
-
-        // Check if the response is not a JSON (i.e., HTML error page)
-        if (response.headers.get('content-type').includes('text/html')) {
-            const htmlError = await response.text();
-            console.error('Received HTML error:', htmlError);
-            throw new Error('Received HTML error response, not JSON');
-        }
-
-        // Parse response as JSON
-        const data = await response.json();
-
-        // Check if 'vulnerabilities' exists in the response
-        if (!data.vulnerabilities) {
-            return []; // Return an empty array if no vulnerabilities are found
-        }
-
-        // Filter CVEs by startDate (only published on the startDate)
-        const filteredCves = data.vulnerabilities?.filter(v => {
-            const publishedDate = new Date(v.cve.published).toISOString().split('T')[0]; // Parse and format published date
-
-            // If the startDate filter is set, include only CVEs published on this date
-            const formattedStartDate = new Date(startDate).toISOString().split('T')[0];
-            return publishedDate === formattedStartDate;
-        }) || [];
-
-        // Map the filtered data to the desired format
-        const cveList = filteredCves.map(v => ({
-            cveId: v.cve.id || 'N/A',
-            publishedDate: v.cve.published || 'N/A',
-            lastModified: v.cve.lastModified || 'N/A',
-            vulnStatus: v.cve.vulnStatus || 'N/A',
-            sourceIdentifier: v.cve.sourceIdentifier || 'N/A',
-            cvssScore: v.cve.metrics.cvssMetricV2 && v.cve.metrics.cvssMetricV2[0].cvssData.baseScore || 'N/A',
-        }));
-
-        // Cache the result for future use
-        cache.set(cacheKey, cveList);
-        return cveList;
-    } catch (error) {
-        console.error('Error in fetchCvesByDate function:', error.message);
         throw error;
     }
 }
