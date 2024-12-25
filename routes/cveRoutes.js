@@ -193,13 +193,17 @@ router.get('/cve-detail/:cveId', async (req, res) => {
 router.get('/list', async (req, res) => {
   const resultsPerPage = parseInt(req.query.resultsPerPage) || 10;
   const page = parseInt(req.query.page) || 1;
+  const searchCveId = req.query.searchCveId || '';
+  const startDate = req.query.startDate || '';
+  const endDate = req.query.endDate || '';
+  const cvssScore = parseFloat(req.query.cvssScore) || 0;
 
   try {
-    const cves = await fetchCves(resultsPerPage, page);
-    res.json({ vulnerabilities: cves });
+      const cves = await fetchCves(resultsPerPage, page, searchCveId, startDate, endDate, cvssScore);
+      res.json({ vulnerabilities: cves });
   } catch (error) {
-    console.error('Error in /list route:', error.message);
-    res.status(500).json({ error: 'Failed to fetch CVE data' });
+      console.error('Error in /list route:', error.message);
+      res.status(500).json({ error: 'Failed to fetch CVE data' });
   }
 });
 

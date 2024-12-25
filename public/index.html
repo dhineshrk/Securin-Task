@@ -9,14 +9,30 @@
 <body>
     <h1>CVE Data</h1>
     
+    <!-- Filters Section -->
     <div>
-        <!-- Dropdown for selecting results per page -->
+        <!-- CVE ID Search -->
+        <label for="searchCveId">CVE ID:</label>
+        <input type="text" id="searchCveId" placeholder="Enter CVE ID to search" />
+        
+        <!-- Start Date Filter -->
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" />
+        
+        <!-- CVSS Score Filter -->
+        <label for="cvssScore">Min CVSS Score:</label>
+        <input type="number" id="cvssScore" min="0" max="10" step="0.1" placeholder="0-10" />
+        
+        <!-- Results per page -->
         <label for="resultsPerPage">Results per page:</label>
         <select id="resultsPerPage">
             <option value="10">10</option>
             <option value="50">50</option>
             <option value="100">100</option>
         </select>
+        
+        <!-- Search Button -->
+        <button id="searchButton">Search</button>
     </div>
 
     <div id="totalRecords">Total Records: 0</div>
@@ -26,13 +42,14 @@
         <thead>
             <tr>
                 <th>CVE ID</th>
-                <th>IDENTIFIER</th>
+                <th>Source</th>
                 <th>Published Date</th>
                 <th>Last Modified Date</th>
-                <th>STATUS</th>
+                <th>Status</th>
+                <th>Score</th>
             </tr>
         </thead>
-        <tbody></tbody> <!-- This is where the rows will be added dynamically -->
+        <tbody></tbody>
     </table>
 
     <!-- Pagination controls -->

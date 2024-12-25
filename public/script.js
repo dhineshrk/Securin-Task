@@ -16,18 +16,16 @@ function displayCVEs(cves) {
         return !isNaN(date) ? date.toLocaleDateString('en-GB', options) : 'N/A';
     };
 
-    cves.forEach((vulnerability, index) => {
-        if (!vulnerability.id) {
-            console.warn(`Skipping entry at index ${index} due to missing CVE ID`);
-            return;
-        }
-
+    cves.forEach((vulnerability) => {
         const row = document.createElement('tr');
-        const cveId = vulnerability.id || 'N/A';
+
+        // Ensure we're getting the right properties
+        const cveId = vulnerability.cveId || 'N/A';
         const sourceIdentifier = vulnerability.sourceIdentifier || 'N/A';
-        const publishedDate = formatDate(vulnerability.published) || 'N/A';
+        const publishedDate = formatDate(vulnerability.publishedDate) || 'N/A';
         const modifiedDate = formatDate(vulnerability.lastModified) || 'N/A';
         const vulnStatus = vulnerability.vulnStatus || 'N/A';
+        const cvssScore = vulnerability.cvssScore;
 
         const createCellWithLink = (textContent, link) => {
             const cell = document.createElement('td');
@@ -45,33 +43,35 @@ function displayCVEs(cves) {
         row.appendChild(createCellWithLink(publishedDate, `/cves/cve-detail/${cveId}`));
         row.appendChild(createCellWithLink(modifiedDate, `/cves/cve-detail/${cveId}`));
         row.appendChild(createCellWithLink(vulnStatus, `/cves/cve-detail/${cveId}`));
+        row.appendChild(createCellWithLink(cvssScore, `/cves/cve-detail/${cveId}`));
 
         tableBody.appendChild(row);
     });
 }
 
-// Function to load CVEs based on the current page and selected results per page
+// Function to load CVEs based on the current page and selected filters
 async function loadCVEs(page = 1) {
     currentPage = page;
 
-    const resultsPerPageSelect = document.getElementById('resultsPerPage');
-    const resultsPerPage = resultsPerPageSelect.value;
+    const resultsPerPage = document.getElementById('resultsPerPage').value;
+    const searchCveId = document.getElementById('searchCveId').value;
+    const startDate = document.getElementById('startDate').value;
+    const cvssScore = document.getElementById('cvssScore').value;
 
     try {
-        const response = await fetch(`/cves/list?resultsPerPage=${resultsPerPage}&page=${page}`);
+        const response = await fetch(`/cves/list?resultsPerPage=${resultsPerPage}&page=${page}&searchCveId=${searchCveId}&startDate=${startDate}&cvssScore=${cvssScore}`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch CVE data');
         }
 
         const data = await response.json();
-        console.log('Fetched data:', data);
-
         if (data && data.vulnerabilities) {
             document.getElementById('totalRecords').textContent = `Total Records: ${data.vulnerabilities.length}`;
             displayCVEs(data.vulnerabilities);
             document.getElementById('pageNumber').textContent = `Page ${currentPage}`;
 
+            // Disable or enable pagination buttons
             document.getElementById('prevPage').disabled = currentPage === 1;
             document.getElementById('nextPage').disabled = data.vulnerabilities.length < resultsPerPage;
         } else {
@@ -82,27 +82,21 @@ async function loadCVEs(page = 1) {
     }
 }
 
-// Add an event listener for changes to the "resultsPerPage" input
-document.getElementById('resultsPerPage').addEventListener('change', () => {
-    currentPage = 1; // Reset to the first page when the results per page change
-    loadCVEs(currentPage); // Load the first page with the new results per page value
+// Add event listener for the "Search" button
+document.getElementById('searchButton').addEventListener('click', () => {
+    currentPage = 1; // Reset to the first page when search is triggered
+    loadCVEs(currentPage); // Load with the new filters
 });
 
-// Function to go to the previous page
-function prevPage() {
-    if (currentPage > 1) {
-        loadCVEs(currentPage--);
-    }
-}
-
-// Function to go to the next page
-function nextPage() {
-    loadCVEs(currentPage++);
-}
-
 // Event listeners for previous and next page buttons
-document.getElementById('prevPage').addEventListener('click', prevPage);
-document.getElementById('nextPage').addEventListener('click', nextPage);
+document.getElementById('prevPage').addEventListener('click', () => loadCVEs(currentPage - 1));
+document.getElementById('nextPage').addEventListener('click', () => loadCVEs(currentPage + 1));
+
+// Add event listener for results per page change
+document.getElementById('resultsPerPage').addEventListener('change', () => {
+    currentPage = 1; // Reset to the first page when the results per page changes
+    loadCVEs(currentPage); // Load with the new page size
+});
 
 // Load initial CVEs when the page loads
 loadCVEs();
