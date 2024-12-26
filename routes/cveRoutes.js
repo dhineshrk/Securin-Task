@@ -195,11 +195,13 @@ router.get('/list', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const searchCveId = req.query.searchCveId || '';
   const startDate = req.query.startDate || '';
-  const endDate = req.query.endDate || '';
+  // const endDate = req.query.endDate || '';
   const cvssScore = parseFloat(req.query.cvssScore) || 0;
+  
 
   try {
-      const cves = await fetchCves(resultsPerPage, page, searchCveId, startDate, endDate, cvssScore);
+      const cves = await fetchCves(resultsPerPage, page, searchCveId, startDate, cvssScore);
+      // console.log(cvssScore)
       res.json({ vulnerabilities: cves });
   } catch (error) {
       console.error('Error in /list route:', error.message);

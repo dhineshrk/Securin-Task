@@ -25,7 +25,8 @@ function displayCVEs(cves) {
         const publishedDate = formatDate(vulnerability.publishedDate) || 'N/A';
         const modifiedDate = formatDate(vulnerability.lastModified) || 'N/A';
         const vulnStatus = vulnerability.vulnStatus || 'N/A';
-        const cvssScore = vulnerability.cvssScore;
+        const cvssScore = vulnerability.baseScore;
+        console.log(vulnerability)
 
         const createCellWithLink = (textContent, link) => {
             const cell = document.createElement('td');
@@ -60,8 +61,7 @@ async function loadCVEs(page = 1) {
 
     try {
         const response = await fetch(`/cves/list?resultsPerPage=${resultsPerPage}&page=${page}&searchCveId=${searchCveId}&startDate=${startDate}&cvssScore=${cvssScore}`);
-
-        if (!response.ok) {
+        if (!response.ok) { 
             throw new Error('Failed to fetch CVE data');
         }
 
